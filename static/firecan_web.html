@@ -472,7 +472,7 @@
                     if (feature.properties) {                   
                         let popupContent = `
                             <b>Watershed Details</b><br>
-                            Watershed: ${feature.properties.NOM_COURS_DEAU}<br>
+                            Watershed: ${feature.properties.watershed_name}<br>
                         `;
                         layer.bindPopup(popupContent);
                     }
@@ -492,7 +492,7 @@
             modal.style.display = "block";
             if (!watershedData) {
                 spinner.hidden = false;
-                fetch("/static/qc_watershed_data.geojson")  
+                fetch("/static/watershed_data.geojson")  
                     .then(res => res.json())
                     .then(data => {
                         watershedData = data;  

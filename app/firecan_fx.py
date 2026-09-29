@@ -16,25 +16,38 @@ from pathlib import Path
 from datetime import datetime
 import math
 import shutil
-import sys
+
 
 
 work_dir = Path(__file__).resolve().parent.parent
 DATA_FOLDER_PATH = work_dir / 'data'
-PROCESSED_DATA_FOLDER_PATH = work_dir / "data" / "processed_data"
+PROCESSED_DATA_FOLDER_PATH = DATA_FOLDER_PATH / "processed_data"
 CAN_PROCESSED_DATA_PATH = PROCESSED_DATA_FOLDER_PATH / "can_processed_fire_data.parquet"  # processed data output
-CAN_RAW_DATA_FOLDER_PATH = work_dir / "data" / "canfire"
-CAN_RAW_DATA_PATH = work_dir / "data" / "canfire" / "NFDB_poly_1972to2020_20250630.shp"
+CAN_RAW_DATA_FOLDER_PATH = DATA_FOLDER_PATH / "canfire"
+CAN_RAW_DATA_PATH = DATA_FOLDER_PATH / "canfire" / "NFDB_poly_1972to2020_20250630.shp"
 QC_PROCESSED_DATA_PATH = PROCESSED_DATA_FOLDER_PATH / 'qc_processed_fire_data.parquet'
 QC_BEFORE_RAW_DATA_FOLDER_PATH = DATA_FOLDER_PATH / 'qcfires_before76' 
 QC_AFTER_RAW_DATA_FOLDER_PATH = DATA_FOLDER_PATH / 'qcfires_after76' 
 QC_BEFORE_RAW_DATA_PATH = QC_BEFORE_RAW_DATA_FOLDER_PATH / 'FEUX_ANCIENS_PROV.gpkg'
 QC_AFTER_RAW_DATA_PATH = QC_AFTER_RAW_DATA_FOLDER_PATH / 'FEUX_PROV.gpkg'
-WATERSHED_PROCESSED_DATA_PATH = PROCESSED_DATA_FOLDER_PATH / 'qc_watershed_data.parquet'
-WATERSHED_PROCESSED_DATA_JSON_PATH = work_dir/ 'static' / 'qc_watershed_data.geojson'
-WATERSHED_RAW_DATA_FOLDER_PATH = work_dir / "data" / 'qcwatershed_data' 
-WATERSHED_RAW_DATA_PATH = WATERSHED_RAW_DATA_FOLDER_PATH / 'CE_bassin_multi.gdb'
+WATERSHED_PROCESSED_DATA_PATH = PROCESSED_DATA_FOLDER_PATH / 'watershed_data.parquet'
+WATERSHED_PROCESSED_DATA_JSON_PATH = work_dir/ 'static' / 'watershed_data.geojson'
 TOTALFIRE_DATA_PATH = PROCESSED_DATA_FOLDER_PATH / 'TotalFire_data.parquet'
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -193,41 +206,20 @@ def fx_process_qcfire_data():
 
 
 
+def fx_process_watershed_data(gdf):
+    gdf = gdf[["WSCSDA_EN", "geometry"]].rename(columns={"WSCSDA_EN": "watershed_name"})
 
-
-
-
-
-def fx_process_watershed_data():
-    #################### ######################################## ######################################## ######################################## ####################
-    # This function gets the watershed data, it then reads it in, drops some columns, and reprojects it, it also gives each watershed a unique name
-    #################### ######################################## ######################################## ######################################## ####################       
-                                                                
-    watershed_data = gpd.read_file(WATERSHED_RAW_DATA_PATH, layer=1)
-
-    watershed_data = watershed_data[watershed_data['NIVEAU_BASSIN'] == 1]
-    watershed_data = watershed_data.drop(columns=['NO_COURS_DEAU','NO_SEQ_COURS_DEAU','IDENTIFICATION_COMPLETE', 'NOM_COURS_DEAU_MINUSCULE', 'NIVEAU_BASSIN', 'ECHELLE', 'SUPERF_KM2', 'NO_SEQ_BV_PRIMAIRE', 'NOM_BV_PRIMAIRE', 'NO_REG_HYDRO', 'NOM_REG_HYDRO_ABREGE', 'Shape_Length', 'Shape_Area']) # might want shape length and share area later
+    gdf = repojectdata(gdf, 4326)
+    
+    gdf.to_parquet(WATERSHED_PROCESSED_DATA_PATH)
+    gdftogeojson=gdf
+    gdftogeojson["geometry"] = gdftogeojson["geometry"].simplify(tolerance=0.01)            # Simplyfying the tolerance for the geojson watershed polygons to reduce server load 
+    gdftogeojson.to_file(WATERSHED_PROCESSED_DATA_JSON_PATH, driver="GeoJSON") 
     
     
-    watershed_data = watershed_data.copy()
-    mask = watershed_data['NOM_COURS_DEAU'].isna() | (watershed_data['NOM_COURS_DEAU'].str.strip() == "")
-    watershed_data.loc[mask, 'NOM_COURS_DEAU'] = [
-        f"unnamed_{i+1}" for i in range(mask.sum())
-    ]   # making it so each watershed has a unique name (there are multiple watersheds with same name)
-    watershed_data['NOM_COURS_DEAU'] = watershed_data.groupby('NOM_COURS_DEAU').cumcount().add(1).astype(str).radd(watershed_data['NOM_COURS_DEAU'] + "-")
-
-
     
-    watershed_data = repojectdata(watershed_data, 4326)
-
     
-    watershed_data.to_parquet(WATERSHED_PROCESSED_DATA_PATH)  
-    watershed_data_togeojson=watershed_data
-    watershed_data_togeojson["geometry"] = watershed_data_togeojson["geometry"].simplify(tolerance=0.01)            # Simplyfying the tolerance for the geojson watershed polygons to reduce server load 
-    watershed_data_togeojson.to_file(WATERSHED_PROCESSED_DATA_JSON_PATH, driver="GeoJSON")                                 # saving as static geojson to be sent for watershed explorer
-    shutil.rmtree(WATERSHED_RAW_DATA_FOLDER_PATH) 
 
-    return watershed_data
 
 
 
@@ -310,7 +302,7 @@ def fx_filter_fires_data(                                                       
             conditions.append(filtered_gdf.geometry.intersects(buffer_deg.iloc[0]))
 
     if watershed_name  != '':  
-            selected_ws = watershed_data[watershed_data['NOM_COURS_DEAU'] == watershed_name]
+            selected_ws = watershed_data[watershed_data['watershed_name'] == watershed_name]
             print(selected_ws)
             if not selected_ws.empty:
                 print('Starting Watershed Filtering', timenow())
@@ -459,6 +451,46 @@ def fx_download_gpkg(filtered_data, MAX_SIZE_MB):
 #################### ######################################## ######################################## ######################################## ####################
 # Function Graveyard
 #################### ######################################## ######################################## ######################################## ####################
+
+# def fx_process_watershed_data():
+#     #################### ######################################## ######################################## ######################################## ####################
+#     # This function gets the watershed data, it then reads it in, drops some columns, and reprojects it, it also gives each watershed a unique name
+#     #################### ######################################## ######################################## ######################################## ####################       
+                                                                
+#     watershed_data = gpd.read_file(WATERSHED_RAW_DATA_PATH, layer=1)
+
+#     watershed_data = watershed_data[watershed_data['NIVEAU_BASSIN'] == 1]
+#     watershed_data = watershed_data.drop(columns=['NO_COURS_DEAU','NO_SEQ_COURS_DEAU','IDENTIFICATION_COMPLETE', 'NOM_COURS_DEAU_MINUSCULE', 'NIVEAU_BASSIN', 'ECHELLE', 'SUPERF_KM2', 'NO_SEQ_BV_PRIMAIRE', 'NOM_BV_PRIMAIRE', 'NO_REG_HYDRO', 'NOM_REG_HYDRO_ABREGE', 'Shape_Length', 'Shape_Area']) # might want shape length and share area later
+    
+    
+#     watershed_data = watershed_data.copy()
+#     mask = watershed_data['NOM_COURS_DEAU'].isna() | (watershed_data['NOM_COURS_DEAU'].str.strip() == "")
+#     watershed_data.loc[mask, 'NOM_COURS_DEAU'] = [
+#         f"unnamed_{i+1}" for i in range(mask.sum())
+#     ]   # making it so each watershed has a unique name (there are multiple watersheds with same name)
+#     watershed_data['NOM_COURS_DEAU'] = watershed_data.groupby('NOM_COURS_DEAU').cumcount().add(1).astype(str).radd(watershed_data['NOM_COURS_DEAU'] + "-")
+
+
+    
+#     watershed_data = repojectdata(watershed_data, 4326)
+
+    
+#     watershed_data.to_parquet(WATERSHED_PROCESSED_DATA_PATH)  
+#     watershed_data_togeojson=watershed_data
+#     watershed_data_togeojson["geometry"] = watershed_data_togeojson["geometry"].simplify(tolerance=0.01)            # Simplyfying the tolerance for the geojson watershed polygons to reduce server load 
+#     watershed_data_togeojson.to_file(WATERSHED_PROCESSED_DATA_JSON_PATH, driver="GeoJSON")                                 # saving as static geojson to be sent for watershed explorer
+#     shutil.rmtree(WATERSHED_RAW_DATA_FOLDER_PATH) 
+
+#     return watershed_data
+
+
+
+
+
+
+
+
+
 
 # def fx_get_can_fire_data():
 #     #################### ######################################## ######################################## ######################################## ####################

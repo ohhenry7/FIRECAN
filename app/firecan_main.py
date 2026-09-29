@@ -8,7 +8,8 @@ import geopandas as gpd
 import webbrowser
 import threading
 from pathlib import Path
-
+import requests
+import io
 
 
 work_dir = Path(__file__).resolve().parent.parent
@@ -22,10 +23,8 @@ QC_BEFORE_RAW_DATA_FOLDER_PATH = DATA_FOLDER_PATH / 'qcfires_before76'
 QC_AFTER_RAW_DATA_FOLDER_PATH = DATA_FOLDER_PATH / 'qcfires_after76' 
 QC_BEFORE_RAW_DATA_PATH = QC_BEFORE_RAW_DATA_FOLDER_PATH / 'FEUX_ANCIENS_PROV.gpkg'
 QC_AFTER_RAW_DATA_PATH = QC_AFTER_RAW_DATA_FOLDER_PATH / 'FEUX_PROV.gpkg'
-WATERSHED_PROCESSED_DATA_PATH = PROCESSED_DATA_FOLDER_PATH / 'qc_watershed_data.parquet'
-WATERSHED_PROCESSED_DATA_JSON_PATH = work_dir/ 'static' / 'qc_watershed_data.geojson'
-WATERSHED_RAW_DATA_FOLDER_PATH = DATA_FOLDER_PATH / 'qcwatershed_data' 
-WATERSHED_RAW_DATA_PATH = WATERSHED_RAW_DATA_FOLDER_PATH / 'CE_bassin_multi.gdb'
+WATERSHED_PROCESSED_DATA_PATH = PROCESSED_DATA_FOLDER_PATH / 'watershed_data.parquet'
+WATERSHED_PROCESSED_DATA_JSON_PATH = work_dir/ 'static' / 'watershed_data.geojson'
 TOTALFIRE_DATA_PATH = PROCESSED_DATA_FOLDER_PATH / 'TotalFire_data.parquet'
 
 
@@ -41,7 +40,7 @@ if TOTALFIRE_DATA_PATH.exists():
     print(f'...... {timenow()} The Full Dataset Already Exists, Loading in Now')
     gdf_fires = gpd.read_parquet(TOTALFIRE_DATA_PATH)
 else: 
-    print(f'...... {timenow()} Downloading Fire Data from Git')
+    print(f'...... {timenow()} Attempting to Download Fire Data from Git')
     downloaded = download_processed_data('https://github.com/thomascheung05/FIRECAN/releases/download/DataV1/TotalFire_data.parquet', 'TotalFire_data.parquet', PROCESSED_DATA_FOLDER_PATH)
     if downloaded:
         (f'......... {timenow()} Download Sucess, Loading in Dataset')
@@ -72,27 +71,27 @@ else:
 
 
 
-if WATERSHED_PROCESSED_DATA_PATH.exists():
+if WATERSHED_PROCESSED_DATA_PATH.exists() and WATERSHED_PROCESSED_DATA_JSON_PATH.exists():
     print(f'...... {timenow()} Loading in Watershed Data')
-    gdf_qc_watershed_data = gpd.read_parquet(WATERSHED_PROCESSED_DATA_PATH)
+    gdf_watershed_data = gpd.read_parquet(WATERSHED_PROCESSED_DATA_PATH)
 else:
-    print(f'...... {timenow()} Downloading Watershed Data from Git')
-    downloaded = download_processed_data('https://github.com/thomascheung05/FIRECAN/releases/download/DataV1/qc_watershed_data.parquet', 'qc_watershed_data.parquet', PROCESSED_DATA_FOLDER_PATH)
+    print(f'...... {timenow()} Attempting to Download Watershed Data from Git')
+    downloaded = download_processed_data('https://github.com/thomascheung05/FIRECAN/releases/download/DataV1/watershed_data.parquet', 'watershed_data.parquet', PROCESSED_DATA_FOLDER_PATH)
     if downloaded:
         (f'......... {timenow()} Download Sucess, Loading in Dataset')
-        gdf_qc_watershed_data = gpd.read_parquet(WATERSHED_PROCESSED_DATA_PATH)
-        watershed_data_togeojson=gdf_qc_watershed_data
+        gdf_watershed_data = gpd.read_parquet(WATERSHED_PROCESSED_DATA_PATH)
+        watershed_data_togeojson=gdf_watershed_data
         watershed_data_togeojson["geometry"] = watershed_data_togeojson["geometry"].simplify(tolerance=0.01)            # Simplyfying the tolerance for the geojson watershed polygons to reduce server load 
         watershed_data_togeojson.to_file(WATERSHED_PROCESSED_DATA_JSON_PATH, driver="GeoJSON")  
     else:
-        print(f'...... {timenow()} The Raw Quebec Watershed Does Not Exist, Downloading Now')
-        fx_download_raw_data(
-            'qcwatershed_data',
-            'https://stqc380donopppdtce01.blob.core.windows.net/donnees-ouvertes/Bassins_hydrographiques_multi_echelles/CE_bassin_multi.gdb.zip',
-            'CE_bassin_multi.gdb.zip',
-            )  
+        print(f'...... {timenow()} The Raw Watershed Does Not Exist, Downloading Now')
+        Watershed_data_url = ("https://services.arcgis.com/As5CFN3ThbQpy8Ph/arcgis/rest/services/1Watersheds/FeatureServer/0/query"
+            "?outFields=*&where=1%3D1&f=geojson&outSR=4326")
+        response = requests.get(Watershed_data_url, timeout=120)
+        response.raise_for_status()
+        watershed_data = gpd.read_file(io.BytesIO(response.content))
         print(f'............ {timenow()} Pre-Processing the QC Watershed Data')   
-        gdf_qc_watershed_data = fx_process_watershed_data()
+        gdf_watershed_data = fx_process_watershed_data(watershed_data)
         print(f'............ {timenow()} Pre-Processing Complete')  
 
       
@@ -122,7 +121,7 @@ def fx_main():                                                                  
     print(timenow(),'Filtering Data')                                                                                 # Uses the filtering fire function to return a dataset with only the fires the user wants 
     results= fx_filter_fires_data(
                                     gdf_fires,
-                                    gdf_qc_watershed_data,
+                                    gdf_watershed_data,
                                     selected_provinces,
                                     min_year=min_year,
                                     max_year=max_year,
@@ -169,7 +168,7 @@ def fx_main():                                                                  
         geojson_buffer = json.loads(bufferdeg.to_json()) if bufferdeg is not None else None
         
         if watershed_polygon is not None:
-            ws_gs = gpd.GeoSeries([watershed_polygon], crs=gdf_qc_watershed_data.crs)
+            ws_gs = gpd.GeoSeries([watershed_polygon], crs=gdf_watershed_data.crs)
             ws_gs = ws_gs.to_crs("EPSG:4326")
             geojson_watershedpolygon = json.loads(ws_gs.to_json())
         else:

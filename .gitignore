@@ -1,5 +1,5 @@
 __pycache__      
-static/qc_watershed_data.geojson            
+static/watershed_data.geojson            
 data/*    
 build/                     
 dist/     
