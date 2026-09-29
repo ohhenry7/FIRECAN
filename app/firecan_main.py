@@ -1,7 +1,7 @@
 MAX_SIZE_MB = 100
 
 
-from firecan_fx import get_work_dir, download_processed_data,fx_process_watershed_data,fx_process_qcfire_data,create_processeddata_folder,fx_process_canfire_data, fx_download_raw_data,convert_m_4326deg,fx_merge_provincial_fires,timenow,create_data_folder,fx_filter_fires_data,fx_download_json,fx_download_csv,timenow, fx_download_gpkg
+from firecan_fx import download_processed_data,fx_process_watershed_data,fx_process_qcfire_data,create_processeddata_folder,fx_process_canfire_data, fx_download_raw_data,convert_m_4326deg,fx_merge_provincial_fires,timenow,create_data_folder,fx_filter_fires_data,fx_download_json,fx_download_csv,timenow, fx_download_gpkg
 from flask import Flask, request # type: ignore
 import json
 import geopandas as gpd
@@ -11,12 +11,12 @@ from pathlib import Path
 
 
 
-work_dir = get_work_dir()
+work_dir = Path(__file__).resolve().parent.parent
 DATA_FOLDER_PATH = work_dir / 'data'
-PROCESSED_DATA_FOLDER_PATH = work_dir / "data" / "processed_data"
+PROCESSED_DATA_FOLDER_PATH = DATA_FOLDER_PATH / "processed_data"
 CAN_PROCESSED_DATA_PATH = PROCESSED_DATA_FOLDER_PATH / "can_processed_fire_data.parquet"  # processed data output
-CAN_RAW_DATA_FOLDER_PATH = work_dir / "data" / "canfire"
-CAN_RAW_DATA_PATH = work_dir / "data" / "canfire" / "NFDB_poly_1972to2020_20250630.shp"
+CAN_RAW_DATA_FOLDER_PATH = DATA_FOLDER_PATH / "canfire"
+CAN_RAW_DATA_PATH = DATA_FOLDER_PATH / "canfire" / "NFDB_poly_1972to2020_20250630.shp"
 QC_PROCESSED_DATA_PATH = PROCESSED_DATA_FOLDER_PATH / 'qc_processed_fire_data.parquet'
 QC_BEFORE_RAW_DATA_FOLDER_PATH = DATA_FOLDER_PATH / 'qcfires_before76' 
 QC_AFTER_RAW_DATA_FOLDER_PATH = DATA_FOLDER_PATH / 'qcfires_after76' 
@@ -24,7 +24,7 @@ QC_BEFORE_RAW_DATA_PATH = QC_BEFORE_RAW_DATA_FOLDER_PATH / 'FEUX_ANCIENS_PROV.gp
 QC_AFTER_RAW_DATA_PATH = QC_AFTER_RAW_DATA_FOLDER_PATH / 'FEUX_PROV.gpkg'
 WATERSHED_PROCESSED_DATA_PATH = PROCESSED_DATA_FOLDER_PATH / 'qc_watershed_data.parquet'
 WATERSHED_PROCESSED_DATA_JSON_PATH = work_dir/ 'static' / 'qc_watershed_data.geojson'
-WATERSHED_RAW_DATA_FOLDER_PATH = work_dir / "data" / 'qcwatershed_data' 
+WATERSHED_RAW_DATA_FOLDER_PATH = DATA_FOLDER_PATH / 'qcwatershed_data' 
 WATERSHED_RAW_DATA_PATH = WATERSHED_RAW_DATA_FOLDER_PATH / 'CE_bassin_multi.gdb'
 TOTALFIRE_DATA_PATH = PROCESSED_DATA_FOLDER_PATH / 'TotalFire_data.parquet'
 
@@ -100,7 +100,7 @@ print('---------------Data pre-loading complete. The app is now ready to serve r
 
 
 
-app = Flask(__name__, static_folder='static')                                                      # This starts FLASK which allows me to talk back and forth with my web page and my java script
+app = Flask(__name__, static_folder=str(work_dir / 'static'))                                                     # This starts FLASK which allows me to talk back and forth with my web page and my java script
 @app.route('/fx_main', methods=['GET'])
 def fx_main():                                                                                    # This is the main fuctino that is run when my python is called by Flask 
     #################### ######################################## ######################################## ######################################## ####################
