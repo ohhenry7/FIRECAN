@@ -198,11 +198,6 @@ def fx_process_qcfire_data():
 
 
 
-
-
-
-
-
 def fx_process_watershed_data():
     #################### ######################################## ######################################## ######################################## ####################
     # This function gets the watershed data, it then reads it in, drops some columns, and reprojects it, it also gives each watershed a unique name
