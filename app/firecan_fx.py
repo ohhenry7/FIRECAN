@@ -245,7 +245,6 @@ def fx_merge_provincial_fires(data1, data2):
     combined_gdf = pd.concat([data1, data2], ignore_index=True)
 
     combined_gdf = gpd.GeoDataFrame(combined_gdf, geometry='geometry', crs=data1.crs)
-    unique_provinces = combined_gdf['province'].unique()
     
     combined_gdf.to_parquet(TOTALFIRE_DATA_PATH)  
     CAN_PROCESSED_DATA_PATH.unlink(missing_ok=True)
