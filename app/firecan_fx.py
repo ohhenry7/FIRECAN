@@ -36,22 +36,6 @@ TOTALFIRE_DATA_PATH = PROCESSED_DATA_FOLDER_PATH / 'TotalFire_data.parquet'
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 def timenow():
     return datetime.now().strftime('%H:%M:%S')
 
@@ -140,10 +124,12 @@ def fx_process_canfire_data():
     
     gdf = gpd.read_file(CAN_RAW_DATA_PATH)
 
-    gdf = gdf[['YEAR', 'SIZE_HA', 'SRC_AGENCY', 'geometry']]
+    gdf = gdf[['YEAR', 'SIZE_HA', 'SRC_AGENCY', 'MAP_SOURCE', 'geometry']]
     gdf = gdf.rename(columns={'YEAR': 'fire_year'})
     gdf = gdf.rename(columns={'SIZE_HA': 'fire_size'})
-    gdf = gdf.rename(columns={'SRC_AGENCY': 'province'})  
+    gdf = gdf.rename(columns={'SRC_AGENCY': 'province'}) 
+    gdf["data_source"] = "CWFIS" 
+    gdf = gdf.rename(columns={'MAP_SOURCE': 'data_aquisition'}) 
 
     pc_codes = ['PC-PA','PC-WB','PC-JA','PC-NA','PC-RM','PC-EI','PC-BA','PC-KO','PC-LM','PC-GL','PC-PU','PC-VU','PC-YO','PC-SY','PC-GR','PC-WP','PC-RE','PC-TN','PC-WL','PC-NI']
     pc_to_province = {'PC-PA':'SK', 'PC-WB':'AB', 'PC-JA':'AB', 'PC-NA':'NT', 'PC-RM':'MB','PC-EI':'AB', 'PC-BA':'AB', 'PC-KO':'QC', 'PC-LM':'QC', 'PC-GL':'QC','PC-PU':'QC', 'PC-VU':'QC', 'PC-YO':'YT', 'PC-SY':'NT', 'PC-GR':'AB','PC-WP':'MB', 'PC-RE':'QC', 'PC-TN':'QC', 'PC-WL':'ON', 'PC-NI':'ON'}
@@ -190,7 +176,8 @@ def fx_process_qcfire_data():
     merged_data = merged_data.rename(columns={'an_origine': 'fire_year'})
     merged_data = merged_data.rename(columns={'superficie': 'fire_size'})
     merged_data["province"] = "QC"
-    
+    merged_data["data_source"] = "DQ"
+    merged_data["data_aquisition"] = pd.NA
 
     merged_data = repojectdata(merged_data, 4326)
 
@@ -258,11 +245,11 @@ def fx_filter_fires_data(                                                       
     #################### ######################################## ######################################## ######################################## ####################
     # Filters data set by storing conditions in list and then applyign them all at once, returning all the polygons necessary depending on the fitlers used
     #################### ######################################## ######################################## ######################################## ####################
-    if "ALL" in provincelist:
-        filtered_gdf = fire_gdf
-    elif pc_name != '':                 # if provincial park filtering is selected just include all the provinces
+    if pc_name:                                   # also handles None
         filtered_gdf = fire_gdf[fire_gdf['pc'] == pc_name]
-    else:  
+    elif "ALL" in provincelist:
+        filtered_gdf = fire_gdf
+    else:
         filtered_gdf = fire_gdf[fire_gdf['province'].isin(provincelist)]
     
     conditions = []     # List of filtering conditions 
@@ -424,6 +411,129 @@ def fx_download_gpkg(filtered_data, MAX_SIZE_MB):
         as_attachment=True,
         download_name='firecan_filtered_data.gpkg'
     )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -41,7 +41,7 @@ if TOTALFIRE_DATA_PATH.exists():
     gdf_fires = gpd.read_parquet(TOTALFIRE_DATA_PATH)
 else: 
     print(f'...... {timenow()} Attempting to Download Fire Data from Git')
-    downloaded = download_processed_data('https://github.com/thomascheung05/FIRECAN/releases/download/DataV1/TotalFire_data.parquet', 'TotalFire_data.parquet', PROCESSED_DATA_FOLDER_PATH)
+    downloaded = download_processed_data('BREAKhttps://github.com/thomascheung05/FIRECAN/releases/download/DataV1/TotalFire_data.parquet', 'TotalFire_data.parquet', PROCESSED_DATA_FOLDER_PATH)
     if downloaded:
         (f'......... {timenow()} Download Sucess, Loading in Dataset')
         gdf_fires = gpd.read_parquet(TOTALFIRE_DATA_PATH)
@@ -86,7 +86,7 @@ else:
     else:
         print(f'...... {timenow()} The Raw Watershed Does Not Exist, Downloading Now')
         Watershed_data_url = ("https://services.arcgis.com/As5CFN3ThbQpy8Ph/arcgis/rest/services/1Watersheds/FeatureServer/0/query"
-            "?outFields=*&where=1%3D1&f=geojson&outSR=4326")
+                              "?outFields=*&where=1%3D1&f=geojson&outSR=4326")
         response = requests.get(Watershed_data_url, timeout=120)
         response.raise_for_status()
         watershed_data = gpd.read_file(io.BytesIO(response.content))
@@ -119,7 +119,7 @@ def fx_main():                                                                  
     pc_name = request.args.get('pc_name', None)
     
     print(timenow(),'Filtering Data')                                                                                 # Uses the filtering fire function to return a dataset with only the fires the user wants 
-    results= fx_filter_fires_data(
+    results = fx_filter_fires_data(
                                     gdf_fires,
                                     gdf_watershed_data,
                                     selected_provinces,

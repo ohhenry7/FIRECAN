@@ -64,7 +64,7 @@ MAX_SIZE_MB = 10 # Change this value as needed
 FIRECAN utilizes publicly available data from the following sources:
 
 *   **Quebec Fires**: [Données Québec - Feux de forêt](https://www.donneesquebec.ca/recherche/dataset/feux-de-foret)
-*   **Quebec Watersheds**: [Données Québec - Bassins hydrographiques](https://www.donneesquebec.ca/recherche/dataset/bassins-hydrographiques-multi-echelles-du-quebec)
+*   **Watersheds**: [Esri Canada Education and Research](https://hub.arcgis.com/maps/12b6e33d5a754c92b97ae5d0fed6940a/about)
 *   **All Other Provinces**: [Canadian Wildland Fire Information System (CWFIS)](https://cwfis.cfs.nrcan.gc.ca/datamart)
 
 ## Project Structure

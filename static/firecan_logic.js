@@ -238,7 +238,9 @@ function loadFilteredData() {                                                   
                   let popupContent = `
                       <b>Fire Details</b><br>
                       Year: ${feature.properties.fire_year}<br>
-                      Size: ${feature.properties.fire_size} ha
+                      Size: ${feature.properties.fire_size} ha<br>
+                      Data Source: ${feature.properties.data_source}<br>
+                      Data Aquisition: ${feature.properties.data_aquisition}<br>
                   `;
                   layer.bindPopup(popupContent);
               }
