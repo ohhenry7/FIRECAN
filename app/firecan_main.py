@@ -41,7 +41,7 @@ if TOTALFIRE_DATA_PATH.exists():
     gdf_fires = gpd.read_parquet(TOTALFIRE_DATA_PATH)
 else: 
     print(f'...... {timenow()} Attempting to Download Fire Data from Git')
-    downloaded = download_processed_data('BREAKhttps://github.com/thomascheung05/FIRECAN/releases/download/DataV1/TotalFire_data.parquet', 'TotalFire_data.parquet', PROCESSED_DATA_FOLDER_PATH)
+    downloaded = download_processed_data('https://github.com/thomascheung05/FIRECAN/releases/download/DataV1/TotalFire_data.parquet', 'TotalFire_data.parquet', PROCESSED_DATA_FOLDER_PATH)
     if downloaded:
         (f'......... {timenow()} Download Sucess, Loading in Dataset')
         gdf_fires = gpd.read_parquet(TOTALFIRE_DATA_PATH)

@@ -77,3 +77,13 @@ FIRECAN utilizes publicly available data from the following sources:
     *   `firecan_logic.js`: Core frontend JavaScript for handling user interactions, API calls to the backend, and map rendering with Leaflet.
     *   `firecan_style.css`: Custom CSS for styling the web application.
     *   `leaflet.js` & `leaflet.css`: The Leaflet library files for the interactive map.
+  
+
+
+
+## Dev Notes:
+CWFIS got ride of provincial parks in the province column instead of the province
+Two issues
+1) parks filtering no longer works, will need to filter the same way i filter watersheds
+2) before i would remove all QC fires that were not in a park, now i remove all QC fires
+I should figure out how much overlap there is between the two datasets
