@@ -523,6 +523,26 @@
             console.log("Filters cleared.");
         }
     </script>
+    <!-- Can't select "all" + a province -->
+    <script>
+        const container = document.getElementById('provincecheckboxes');
+        const allBox = document.getElementById('ALLcheckbox');
+        const provinceBoxes = container.querySelectorAll('input[type="checkbox"]:not(#ALLcheckbox)');
+
+        container.addEventListener('change', (e) => {
+            if (e.target === allBox) {
+            // Ticking "All" clears every province
+            if (allBox.checked) provinceBoxes.forEach(cb => cb.checked = false);
+            } else if (e.target.checked) {
+            // Ticking any province clears "All"
+            allBox.checked = false;
+            }
+
+            // If nothing is ticked, fall back to "All"
+            const anyProvince = [...provinceBoxes].some(cb => cb.checked);
+            if (!anyProvince) allBox.checked = true;
+        });
+    </script>
 </body>
 </html>
 
