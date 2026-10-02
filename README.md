@@ -82,8 +82,8 @@ FIRECAN utilizes publicly available data from the following sources:
 
 
 ## Dev Notes:
-CWFIS got ride of provincial parks in the province column instead of the province
-Two issues
-1) parks filtering no longer works, will need to filter the same way i filter watersheds
-2) before i would remove all QC fires that were not in a park, now i remove all QC fires
-I should figure out how much overlap there is between the two datasets
+I removed parks filtering
+instead should allow user to input a polygon and filter based on that polygon
+that way user can filter based on any polygon they can find their own parks polygon
+<br>
+Make it so the user cannot select a list of provinces while also selecting all
