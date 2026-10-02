@@ -85,5 +85,3 @@ FIRECAN utilizes publicly available data from the following sources:
 I removed parks filtering
 instead should allow user to input a polygon and filter based on that polygon
 that way user can filter based on any polygon they can find their own parks polygon
-<br>
-Make it so the user cannot select a list of provinces while also selecting all
