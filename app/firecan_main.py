@@ -82,7 +82,7 @@ else:
         gdf_watershed_data = gpd.read_parquet(WATERSHED_PROCESSED_DATA_PATH)
         watershed_data_togeojson=gdf_watershed_data
         watershed_data_togeojson["geometry"] = watershed_data_togeojson["geometry"].simplify(tolerance=0.01)            # Simplyfying the tolerance for the geojson watershed polygons to reduce server load 
-        watershed_data_togeojson.to_file(WATERSHED_PROCESSED_DATA_JSON_PATH, driver="GeoJSON")  
+        watershed_data_togeojson.to_file(WATERSHED_PROCESSED_DATA_JSON_PATH, driver="GeoJSON")  #####
     else:
         print(f'...... {timenow()} The Raw Watershed Does Not Exist, Downloading Now')
         Watershed_data_url = ("https://services.arcgis.com/As5CFN3ThbQpy8Ph/arcgis/rest/services/1Watersheds/FeatureServer/0/query"
@@ -161,7 +161,7 @@ def fx_main():                                                                  
         polygon_tol_deg = convert_m_4326deg(polygon_tol, 45)
 
         filtered_data["geometry"] = filtered_data["geometry"].simplify(tolerance=polygon_tol_deg, preserve_topology=True)         # add precision option to change how good the polygons look vs load time
-        geojson_fires = json.loads(filtered_data.to_json())                                                                               
+        geojson_fires = json.loads(filtered_data.to_json())  ######################################## ######################################## ####################    ######################################## ######################################## ####################    ######################################## ######################################## ####################    ######################################## ######################################## ####################    ######################################## ######################################## ####################    ######################################## ######################################## ####################    ######################################## ######################################## ####################                                                                                 
         print(timenow(),'Done Converting to geojson')    
 
         geojson_point = json.loads(userpoint.to_json()) if userpoint is not None else None
