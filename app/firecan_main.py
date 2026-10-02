@@ -116,7 +116,6 @@ def fx_main():                                                                  
     downloadformat = request.args.get('downloadFormat', None)
     provinces_str = request.args.get('provinces', '[]')   
     selected_provinces = json.loads(provinces_str)         
-    pc_name = request.args.get('pc_name', None)
     
     print(timenow(),'Filtering Data')                                                                                 # Uses the filtering fire function to return a dataset with only the fires the user wants 
     results = fx_filter_fires_data(
@@ -130,7 +129,6 @@ def fx_main():                                                                  
                                     distance_coords=distance_coords,
                                     distance_radius=distance_radius,
                                     watershed_name=watershed_name,
-                                    pc_name = pc_name
                                         )
     print(timenow(),'Done Filtering Data')
 

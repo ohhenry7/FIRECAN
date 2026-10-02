@@ -131,14 +131,8 @@ def fx_process_canfire_data():
     gdf["data_source"] = "CWFIS" 
     gdf = gdf.rename(columns={'MAP_SOURCE': 'data_aquisition'}) 
 
-    pc_codes = ['PC-PA','PC-WB','PC-JA','PC-NA','PC-RM','PC-EI','PC-BA','PC-KO','PC-LM','PC-GL','PC-PU','PC-VU','PC-YO','PC-SY','PC-GR','PC-WP','PC-RE','PC-TN','PC-WL','PC-NI']
-    pc_to_province = {'PC-PA':'SK', 'PC-WB':'AB', 'PC-JA':'AB', 'PC-NA':'NT', 'PC-RM':'MB','PC-EI':'AB', 'PC-BA':'AB', 'PC-KO':'QC', 'PC-LM':'QC', 'PC-GL':'QC','PC-PU':'QC', 'PC-VU':'QC', 'PC-YO':'YT', 'PC-SY':'NT', 'PC-GR':'AB','PC-WP':'MB', 'PC-RE':'QC', 'PC-TN':'QC', 'PC-WL':'ON', 'PC-NI':'ON'}
-    parks_decoded = {'PC-PA': 'Prince Albert National Park','PC-WB': 'Wood Buffalo National Park','PC-JA': 'Jasper National Park','PC-NA': 'Nahanni National Park','PC-RM': 'Riding Mountain National Park','PC-EI': 'Elk Island National Park','PC-BA': 'Banff National Park','PC-KO': 'Kootenay National Park','PC-LM': 'La Mauricie National Park','PC-GL': 'Glacier National Park', 'PC-PU': 'Pukaskwa National Park','PC-VU': 'Vuntut National Park','PC-YO': 'Yoho National Park','PC-SY': 'Saoyú-ehdacho National Historic Site','PC-GR': 'Grasslands National Park','PC-WP': 'Wapusk National Park','PC-RE': 'Mount Revelstoke National Park','PC-TN': 'Terra Nova National Park','PC-WL': 'Waterton Lakes National Park','PC-NI': 'PC-NI'}
-
     gdf = gdf[gdf['province'] != 'QC']              # gets ride of all QC fires, but not the ones that are in natinal parks as these ones have province = the national park they are in
-    gdf['pc'] = gdf['province'].where(gdf['province'].isin(pc_codes), '')     # creating parks column that contains only the provinces that had a parks code as the province   
-    gdf['pc'] = gdf['pc'].replace(parks_decoded)                            # in the parks column we change their parks code to an easier parks code 
-    gdf['province'] = gdf['province'].replace(pc_to_province)    # Now we change all the province park codes to province codes in the province column
+
         
 
     gdf = repojectdata(gdf, 4326) 
@@ -239,15 +233,12 @@ def fx_filter_fires_data(                                                       
     max_size,
     distance_coords,
     distance_radius,
-    watershed_name,
-    pc_name
+    watershed_name
     ):
     #################### ######################################## ######################################## ######################################## ####################
     # Filters data set by storing conditions in list and then applyign them all at once, returning all the polygons necessary depending on the fitlers used
     #################### ######################################## ######################################## ######################################## ####################
-    if pc_name:                                   # also handles None
-        filtered_gdf = fire_gdf[fire_gdf['pc'] == pc_name]
-    elif "ALL" in provincelist:
+    if "ALL" in provincelist:
         filtered_gdf = fire_gdf
     else:
         filtered_gdf = fire_gdf[fire_gdf['province'].isin(provincelist)]
@@ -561,6 +552,38 @@ def fx_download_gpkg(filtered_data, MAX_SIZE_MB):
 #################### ######################################## ######################################## ######################################## ####################
 # Function Graveyard
 #################### ######################################## ######################################## ######################################## ####################
+
+#CANFIRE WITH PARKS CANADA IMBEDED INTO THE DATASET
+# def fx_process_canfire_data():
+    
+#     gdf = gpd.read_file(CAN_RAW_DATA_PATH)
+
+#     gdf = gdf[['YEAR', 'SIZE_HA', 'SRC_AGENCY', 'MAP_SOURCE', 'geometry']]
+#     gdf = gdf.rename(columns={'YEAR': 'fire_year'})
+#     gdf = gdf.rename(columns={'SIZE_HA': 'fire_size'})
+#     gdf = gdf.rename(columns={'SRC_AGENCY': 'province'}) 
+#     gdf["data_source"] = "CWFIS" 
+#     gdf = gdf.rename(columns={'MAP_SOURCE': 'data_aquisition'}) 
+
+#     pc_codes = ['PC-PA','PC-WB','PC-JA','PC-NA','PC-RM','PC-EI','PC-BA','PC-KO','PC-LM','PC-GL','PC-PU','PC-VU','PC-YO','PC-SY','PC-GR','PC-WP','PC-RE','PC-TN','PC-WL','PC-NI']
+#     pc_to_province = {'PC-PA':'SK', 'PC-WB':'AB', 'PC-JA':'AB', 'PC-NA':'NT', 'PC-RM':'MB','PC-EI':'AB', 'PC-BA':'AB', 'PC-KO':'QC', 'PC-LM':'QC', 'PC-GL':'QC','PC-PU':'QC', 'PC-VU':'QC', 'PC-YO':'YT', 'PC-SY':'NT', 'PC-GR':'AB','PC-WP':'MB', 'PC-RE':'QC', 'PC-TN':'QC', 'PC-WL':'ON', 'PC-NI':'ON'}
+#     parks_decoded = {'PC-PA': 'Prince Albert National Park','PC-WB': 'Wood Buffalo National Park','PC-JA': 'Jasper National Park','PC-NA': 'Nahanni National Park','PC-RM': 'Riding Mountain National Park','PC-EI': 'Elk Island National Park','PC-BA': 'Banff National Park','PC-KO': 'Kootenay National Park','PC-LM': 'La Mauricie National Park','PC-GL': 'Glacier National Park', 'PC-PU': 'Pukaskwa National Park','PC-VU': 'Vuntut National Park','PC-YO': 'Yoho National Park','PC-SY': 'Saoyú-ehdacho National Historic Site','PC-GR': 'Grasslands National Park','PC-WP': 'Wapusk National Park','PC-RE': 'Mount Revelstoke National Park','PC-TN': 'Terra Nova National Park','PC-WL': 'Waterton Lakes National Park','PC-NI': 'PC-NI'}
+
+#     gdf = gdf[gdf['province'] != 'QC']              # gets ride of all QC fires, but not the ones that are in natinal parks as these ones have province = the national park they are in
+#     gdf['pc'] = gdf['province'].where(gdf['province'].isin(pc_codes), '')     # creating parks column that contains only the provinces that had a parks code as the province   
+#     gdf['pc'] = gdf['pc'].replace(parks_decoded)                            # in the parks column we change their parks code to an easier parks code 
+#     gdf['province'] = gdf['province'].replace(pc_to_province)    # Now we change all the province park codes to province codes in the province column
+        
+
+#     gdf = repojectdata(gdf, 4326) 
+   
+
+#     gdf.to_parquet(CAN_PROCESSED_DATA_PATH)
+#     shutil.rmtree(CAN_RAW_DATA_FOLDER_PATH)   
+
+#     return gdf
+
+
 
 # def fx_process_watershed_data():
 #     #################### ######################################## ######################################## ######################################## ####################

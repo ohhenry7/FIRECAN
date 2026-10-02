@@ -27,4 +27,4 @@ python -m pip install --quiet -r requirements.txt
 
 # Run the app
 echo "Starting app..."
-python firecan_main.py
+python app/firecan_main.py
