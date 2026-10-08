@@ -44,7 +44,7 @@ The first time you run the application, it will automatically create a VENV, ins
 
 
 3.  **Using the Interface:**
-    *   The app opens at **http://127.0.0.1:5050**. You can paste this address into Chrome or another browser. Port 5050 avoids the macOS AirPlay service on port 5000.
+    *   The app opens at **http://127.0.0.1:5050**. You can paste this address into Chrome or another browser.
     *   Use the floating Filters panel to set your desired filters. Collapse it to see more of the map.
     *   Click the **"Filter Map"** button to apply the filters and display the corresponding fire polygons on the map.
     *   Click **Export** to download the current filter selection as CSV, GeoJSON, or GeoPackage. Geometry exports keep the original fire boundaries.
